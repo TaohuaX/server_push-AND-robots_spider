@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="https://cdn.bootcss.com/jquery/3.2.0/jquery.min.js"></script>
+</head>
+
+<body>
+    <h1 class="h1">comet</h1>
+    <script>
+        // 方法一
+        // function getData() {
+        //     $.ajax({
+        //         url: 'data.php',
+        //         dataType: 'json',
+        //         success: function (data) {
+        //             console.log(data)
+        //             console.log($('.h1').html())
+        //             $('.h1').html((data))
+        //             getData()
+        //         }
+        //     })
+        // }
+        // getData()
+        // 方法二
+         //封装ajax
+         function ajaxFun(method,url,data,callback,flag){  //method -- 请求方式   url --请求地址 data--需要请求的数据 callback -- 回调函数   请求数据回来验证无误以后执行的函数  flag --是否异步  
+            //1.创建ajax对象   兼容IE 
+            var myAjax = null;    
+            if(window.XMLHttpRequest){
+                myAjax = new XMLHttpRequest();
+            }else{
+                myAjax = new ActiveXObject('Microsoft.XMLHttp');
+            }
+            method = method.toUpperCase(); //防止小写不执行
+            //2.ajax.open(method,url,true)   url请求文件的地址
+            if(method == 'POST'){
+                myAjax.open(method,url,flag);
+                myAjax.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');  
+                myAjax.send(data); 
+            }else if(method == 'GET'){
+                myAjax.open(method,url + '?' + data,flag);
+                myAjax.send(); 
+            }
+             //3.发送请求
+             
+            
+
+            //4.事件监听onreadystatechage   它监听的是readyState   redyState每次变化都会执行onredystatechange  
+            //readyState 对象状态 有四种状态   0--为初始化，未调用send()方法    1--读取中，已调用send()正在发送请求  2--已读取，send方法执行完成，接受到全部响应内容  3--交互中，正在解析响应内容（检查返回的数据）  4--完成，响应内容解析完成
+            //只有readyState 是4的时候才能取出值     当readyState是4的时候还需判断status是不是200   如果是200则说明取出的值是可以用的
+            //发送请求以后会获得一个值   使用responseText会获得字符串形式的响应数据   responseXML会获得XML形式的响应数据
+
+            myAjax.onreadystatechange = function (){
+                if(myAjax.readyState == 3){
+                    if(myAjax.status == 200){
+                        console.log(myAjax)
+                        showList(myAjax.responseText)  //使用一个回调函数来处理返回的数据
+                    }
+                }
+            }
+        }
+        //showList回调函数可以自己写
+        function showList(data){
+            // console.log(data)
+            // var value = [data]
+            data = data.split('/')
+            // console.log(data)
+            // console.log(data.split('}'))
+            // var value = JSON.parse(data);//responseText取出的是字符串格式   用JSON.parse转成JSON对象
+           
+            //遍历 放到一个容器里面   再把容器插入页面
+            var str = '';
+            var bodyHtml = document.getElementsByTagName('body')[0]
+            data.forEach(function (ele,index){
+                str += '<li>' + ele + '</li>';
+            })
+            bodyHtml.innerHTML = str;
+        }
+        ajaxFun('get','data.php', {}, '', true)
+    </script>
+</body>
+
+</html>
